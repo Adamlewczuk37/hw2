@@ -9,6 +9,7 @@
 #include "db_parser.h"
 #include "product_parser.h"
 #include "util.h"
+#include "mydatastore.h"
 
 using namespace std;
 struct ProdNameSorter {
@@ -29,9 +30,7 @@ int main(int argc, char* argv[])
      * Declare your derived DataStore object here replacing
      *  DataStore type to your derived type
      ****************/
-    DataStore ds;
-
-
+    MyDataStore ds;
 
     // Instantiate the individual section and product parsers we want
     ProductSectionParser* productSectionParser = new ProductSectionParser;
@@ -100,15 +99,69 @@ int main(int argc, char* argv[])
                 done = true;
             }
 	    /* Add support for other commands here */
+            else if (cmd == "ADD") {
+              bool valid = 0;
+			  Product* p;
+              string username;
+              unsigned int index;
+              ss >> username;
+              typename std::set<User*>:: iterator it;
+                for (it = ds.users.begin(); it != ds.users.end(); it++){
+                    if ((*it)->getName() == username){
+                        valid = 1;
+                        break;
+                    }
+                }
+                ss >> index;
+                if (index > hits.size()){
+                    valid = 0;
+                }
+                if (valid == 0){
+                    cout << "Invalid request" << endl;
+                } else {
+                    p = hits[index - 1];
+                    ds.addCart(p, username);
+                }
+            }
+            else if (cmd == "VIEWCART") {
+			  bool valid = 0;
+              string username;
+              ss >> username;
+              typename std::set<User*>:: iterator it;
+                for (it = ds.users.begin(); it != ds.users.end(); it++){
+                    if ((*it)->getName() == username){
+                        valid = 1;
+                        break;
+                    }
+                }
+              if (valid == 0){
+                  cout << "Invalid username" << endl;
+              } else {
+				ds.viewCart(username);
+              }
+            }
+            else if (cmd == "BUYCART") {
+			  bool valid = 0;
+              string username;
+              ss >> username;
+              typename std::set<User*>:: iterator it;
+                for (it = ds.users.begin(); it != ds.users.end(); it++){
+                    if ((*it)->getName() == username){
+                        valid = 1;
+                        break;
+                    }
+                }
 
-
-
-
+              if (valid == 0){
+                  cout << "Invalid username" << endl;
+              } else {
+				ds.purchaseCart(username);
+              }
+            }
             else {
                 cout << "Unknown command" << endl;
             }
         }
-
     }
     return 0;
 }
